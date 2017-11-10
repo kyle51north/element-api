@@ -72,6 +72,10 @@ return [
 
 Endpoint configuration arrays can contain the following settings:
 
+#### `class`
+
+The class name of the Fractal resource that should be used to serve the request. If this isn’t set, it will default to `craft\elementapi\resources\ElementResource`. (All of the following configuration settings are specific to that default class.)
+
 #### `elementType` _(Required)_
 
 The class name of the element type that the API should be associated with. Craft’s built-in element type classes are:
@@ -327,10 +331,37 @@ return [
 ];
 ```
 
+### Entry Drafts and Versions
+
+Element API provides an entry-specific Fractal resource that adds `draftId` and `versionId` configuration settings. To use it, set the [`class`](#class) configuration setting to `'craft\elementapi\resources\EntryResource'`.
+
+If `draftId` and `versionId` are not set, it will behave identically to the default Fractal resource. If either of them are set, the `criteria` setting will be ignored, and only the requested entry draft/version will be returned.
+
+It’s probably a good idea to add some level of authentication to your endpoint before setting `draftId` or `versionId`.
+
+```php
+'news/<entryId:\d+>.json' => function($entryId) {
+    if ($draftId = Craft::$app->request->getQueryParam('draftId')) {
+        // Make sure they have permission to view drafts
+        $user = Craft::$app->user->getIdentity();
+        if (!$user || (!$user->admin && !$user->isInGroup('authors'))) {
+            throw new \yii\web\ForbiddenHttpException('You must be an author to access drafts!');
+        }
+    }
+
+    return [
+        'class' => craft\elementapi\resources\EntryResource::class,
+        'criteria' => ['id' => $entryId],
+        'draftId' => $draftId,
+        'one' => true,
+    ];
+},
+```
+
 ## Examples
 
 Here are a few endpoint examples, and what their response would look like.
-
+  
 ### Paginated Entry Index Endpoint
 
 ```php
@@ -427,9 +458,9 @@ Note that `photos`, `body`, `summary`, and `tags` are imaginary custom fields.
 ```php
 'feed.json' => [
     'serializer' => 'jsonFeed',
-    'elementType' => 'Entry',
+    'elementType' => craft\elements\Entry::class,
     'criteria' => ['section' => 'news'],
-    'transformer' => function(EntryModel $entry) {
+    'transformer' => function(craft\elements\Entry $entry) {
         $image = $entry->photos->first();
 
         return [

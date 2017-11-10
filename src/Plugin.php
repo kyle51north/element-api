@@ -3,10 +3,9 @@
 namespace craft\elementapi;
 
 use Craft;
+use craft\elementapi\resources\ElementResource;
 use craft\events\RegisterUrlRulesEvent;
-use craft\helpers\ArrayHelper;
 use craft\web\UrlManager;
-use League\Fractal\Resource\ResourceAbstract;
 use League\Fractal\Resource\ResourceInterface;
 use yii\base\Event;
 
@@ -106,7 +105,7 @@ class Plugin extends \craft\base\Plugin
 
         if (!isset($config['class'])) {
             // Default to ElementResourceAdapter
-            $config['class'] = ElementResourceAdapter::class;
+            $config['class'] = ElementResource::class;
         }
 
         /** @var ResourceInterface|ResourceAdapterInterface $resource */
@@ -119,7 +118,7 @@ class Plugin extends \craft\base\Plugin
         return $resource;
     }
 
-    // Public Methods
+    // Protected Methods
     // =========================================================================
 
     protected function createSettingsModel()

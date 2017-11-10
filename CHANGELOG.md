@@ -1,5 +1,30 @@
-Changelog
-=========
+# Changelog
+
+## 2.5.1 - 2017-11-09
+
+### Changed
+- PHP 7.2 compatibility. 
+
+## 2.5.0 - 2017-10-31
+
+### Added
+- Added support for fetching entry drafts & versions.
+- Added `craft\elementapi\resources\EntryResource`.
+
+### Changed
+- Exceptions are now represented as JSON responses, with `error.code` and `error.message` properties.
+- Renamed `craft\elementapi\ElementResourceAdapter` to `craft\elementapi\resources\ElementResource`.
+- `craft\elementapi\resources\ElementResource::getElementQuery()` and `getTransformer()` are now protected methods.
+
+## 2.4.3 - 2017-09-14
+
+### Fixed
+- Fixed a deprecation error that occurred on Craft 3 Beta 25 and later. ([craftcms/cms#1983](https://github.com/craftcms/cms/issues/1983))
+
+## 2.4.2 - 2017-08-17
+
+### Changed
+- Craft 3 Beta 24 compatibility.
 
 ## 2.4.1 - 2017-07-07
 

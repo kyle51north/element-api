@@ -1,26 +1,29 @@
 <?php
 
-namespace craft\elementapi;
+namespace craft\elementapi\resources;
 
 use Craft;
 use craft\base\ElementInterface;
+use craft\elementapi\ElementTransformer;
+use craft\elementapi\PaginatorAdapter;
+use craft\elementapi\ResourceAdapterInterface;
 use craft\elements\db\ElementQueryInterface;
 use craft\helpers\ArrayHelper;
 use League\Fractal\Resource\Collection;
 use League\Fractal\Resource\Item;
 use League\Fractal\Resource\ResourceInterface;
 use League\Fractal\TransformerAbstract;
+use yii\base\BaseObject;
 use yii\base\Exception;
 use yii\base\InvalidConfigException;
-use yii\base\Object;
 
 /**
- * Resource adapter class.
+ * Element resource adapter class.
  *
  * @author Pixel & Tonic, Inc. <support@pixelandtonic.com>
  * @since  2.0
  */
-class ElementResourceAdapter extends Object implements ResourceAdapterInterface
+class ElementResource extends BaseObject implements ResourceAdapterInterface
 {
     // Properties
     // =========================================================================
@@ -108,35 +111,6 @@ class ElementResourceAdapter extends Object implements ResourceAdapterInterface
     }
 
     /**
-     * Returns the element query based on [[elementType]] and [[criteria]]
-     *
-     * @return ElementQueryInterface
-     */
-    public function getElementQuery(): ElementQueryInterface
-    {
-        /** @var string|ElementInterface $elementType */
-        $elementType = $this->elementType;
-        $query = $elementType::find();
-        Craft::configure($query, $this->criteria);
-
-        return $query;
-    }
-
-    /**
-     * Returns the transformer based on the given endpoint
-     *
-     * @return callable|TransformerAbstract
-     */
-    public function getTransformer()
-    {
-        if (is_callable($this->transformer) || $this->transformer instanceof TransformerAbstract) {
-            return $this->transformer;
-        }
-
-        return Craft::createObject($this->transformer);
-    }
-
-    /**
      * @inheritdoc
      * @throws Exception if [[one]] is true and no element matches [[criteria]]
      */
@@ -166,7 +140,7 @@ class ElementResourceAdapter extends Object implements ResourceAdapterInterface
             $resource = new Collection($elements, $transformer, $this->resourceKey);
             $resource->setPaginator($paginator);
         } else {
-            $resource = new Collection($query, $transformer, $this->resourceKey);
+            $resource = new Collection($query->all(), $transformer, $this->resourceKey);
         }
 
         if ($this->meta !== null) {
@@ -174,5 +148,37 @@ class ElementResourceAdapter extends Object implements ResourceAdapterInterface
         }
 
         return $resource;
+    }
+
+    // Protected Methods
+    // =========================================================================
+
+    /**
+     * Returns the element query based on [[elementType]] and [[criteria]]
+     *
+     * @return ElementQueryInterface
+     */
+    protected function getElementQuery(): ElementQueryInterface
+    {
+        /** @var string|ElementInterface $elementType */
+        $elementType = $this->elementType;
+        $query = $elementType::find();
+        Craft::configure($query, $this->criteria);
+
+        return $query;
+    }
+
+    /**
+     * Returns the transformer based on the given endpoint
+     *
+     * @return callable|TransformerAbstract
+     */
+    protected function getTransformer()
+    {
+        if (is_callable($this->transformer) || $this->transformer instanceof TransformerAbstract) {
+            return $this->transformer;
+        }
+
+        return Craft::createObject($this->transformer);
     }
 }
